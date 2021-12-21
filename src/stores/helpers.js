@@ -162,53 +162,74 @@ export async function buildStaticPage({ page, site, separateModules = false }) {
   </html>
   `
 
-  function buildBlocks(blocks) {
-    return blocks.map(block => {
-      if (!block || block.type === 'options') return ''
-      const { id, type } = block
-      return `
-        ${block.css ? `<style>${block.css}</style>` : ``}
-        <div class="primo-section has-${type}" id="${id}">
-          <div class="primo-${type}">
-            ${block.html || ''}
-          </div>
-        </div>
-      `
-    }).join('')
-  }
-
-  function buildModules(blocks) {
-    return blocks.filter(block => block.js).map(block => {
-      const { id, type } = block
-      return separateModules ? 
-        `<script type="module" async>
-          import App from './_modules/${block.symbol}.js';
-          new App({
-            target: document.querySelector('#${id}'),
-            hydrate: true
-          });
-        </script>`
-      : `<script type="module" async>
-            const App = ${block.js}
-            new App({
-              target: document.querySelector('#${id}'),
-              hydrate: true
-            });
-        </script>`
-    }).join('')
-  }
-
   const modules = uniqBy(
-    blocks.filter(block => block.js).map(block => ({
-      symbol: block.symbol,
+    blocks.filter(block => block.type === 'component').map(block => ({
+      id: block.id,
       content: block.js
-    })), 'symbol'
+    })), 'id'
   )
 
   return separateModules ? {
     html: final,
     modules
   } : final
+
+  function buildBlocks(blocks) {
+    return blocks.map(block => {
+      if (!block || block.type === 'options') return ''
+      const { id, type, css } = block
+      const html = block.html || site.content.en[page.id][id] || ''
+
+      // if content type, attach module to replace html w/ downloaded replacement
+      return `
+      ${css ? `<style>${css}</style>` : ``}
+      <div class="primo-section has-${type}" id="${id}">
+        <div class="primo-${type}">
+          ${html}
+        </div>
+      </div>
+      ${
+        type === 'content' ?
+        `
+        <script type="module" async>
+          // import active language json, hydrate block
+          const urlSearchParams = new URLSearchParams(window.location.search);
+          const {lang = 'en'} = Object.fromEntries(urlSearchParams.entries());
+          fetch('/primo.json').then(res => res.json()).then(site => {
+            document.querySelector('#${id} > .primo-${type}').innerHTML = site.content[lang]['${page.id}']['${block.id}']
+          })
+        </script>
+        ` : ''
+      }
+    `
+    }).join('')
+  }
+
+  function buildModules(blocks) {
+    return blocks.filter(block => block.type === 'component').map(block => {
+      return separateModules ? 
+        `<script type="module" async>
+          import App from './_modules/${block.id}.js';
+          const urlSearchParams = new URLSearchParams(window.location.search);
+          const {lang = 'en'} = Object.fromEntries(urlSearchParams.entries());
+          fetch('/primo.json').then(res => res.json()).then(site => {
+            new App({
+              target: document.querySelector('#${block.id}'),
+              hydrate: true,
+              props: site.content[lang]['${page.id}']['${block.id}']
+            });
+          })
+          // fetch primo.json, extract language json, pass into app, listen to localstorage changes for locale change
+        </script>`
+      : `<script type="module" async>
+            const App = ${block.js};
+            new App({
+              target: document.querySelector('#${block.id}'),
+              hydrate: true
+            });
+        </script>`
+    }).join('')
+  }
 }
 
 

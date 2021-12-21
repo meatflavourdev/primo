@@ -213,7 +213,13 @@ export const DEFAULTS = {
   styles: defaultStyles,
   fields: [],
   symbols: [],
+  content: {
+    'en': { 
+      'index': {}
+    }
+  }
 }
+
 
 export const Page = (id = createUniqueID(), name) => ({
   ...DEFAULTS.page,
@@ -382,26 +388,16 @@ html {
   },
   fields: [],
   symbols: [],
-  languages: {
-    'en': {
-      pages: [
-        {
-          id: 'index',
-          name: 'Casa',
-          sections: [
-            {
-              id: 'ddkjed',
-              data: {
-                'dkjldd': 'Some field value in english'
-              }
-            },
-            {
-              id: 'dkleke',
-              html: '<h1>something in english</h1>'
-            }
-          ]
-        }
-      ]
+  content: {
+    'en': { // locale
+      'index': { // page
+      },
+    },
+    'es': { // locale
+      'index': { // page
+      },
     }
   }
+
+
 })

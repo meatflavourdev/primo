@@ -11,10 +11,12 @@ export const symbols = writable([])
 export const html = writable(DEFAULTS.html)
 export const css = writable(DEFAULTS.css)
 
+export const content = writable(DEFAULTS.content)
+
 // conveniently get the entire site
 export const site = derived(
-  [ id, name, pages, html, css, fields, symbols ], 
-  ([ id, name, pages, html, css, fields, symbols]) => {
+  [ id, name, pages, html, css, fields, symbols, content ], 
+  ([ id, name, pages, html, css, fields, symbols, content]) => {
   return {
     id, 
     name,
@@ -22,7 +24,23 @@ export const site = derived(
     html,
     css,
     fields, 
-    symbols
+    symbols,
+    content
+  }
+})
+
+export default derived(
+  [ id, name, pages, html, css, fields, symbols, content ], 
+  ([ id, name, pages, html, css, fields, symbols, content]) => {
+  return {
+    id, 
+    name,
+    pages,
+    html,
+    css,
+    fields, 
+    symbols,
+    content
   }
 })
 

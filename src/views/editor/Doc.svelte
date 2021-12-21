@@ -4,12 +4,14 @@
   import Block from './Layout/Block.svelte';
   import Spinner from '../../ui/misc/Spinner.svelte';
   import {
+    content,
     pages,
     symbols,
     fields as siteFields,
     html as siteHTML,
     css as siteCSS,
   } from '../../stores/data/draft';
+  import {locale} from '../../stores/app/misc'
   import {
     id as pageID,
     sections,
@@ -54,7 +56,7 @@
           return {
             ...symbolField,
             fields: hydrateChildFields(originalField, symbolField),
-            value: originalField.value,
+            value: $content[$locale][$pageID][block.id][originalField.key]
           };
         }),
       },
@@ -203,7 +205,7 @@
       {#if block.symbolID}
         <Block
           on:mount={() => componentsMounted++}
-          block={hydrateInstance(block, $symbols, $pageFields, $siteFields)}
+          block={hydrateInstance(block, $symbols, $pageFields, $siteFields, $locale)}
           {i}
         />
       {:else}

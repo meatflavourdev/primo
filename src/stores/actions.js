@@ -1,9 +1,9 @@
 import { find, last, cloneDeep, some } from 'lodash-es'
 import { get } from 'svelte/store'
 import { getSymbol } from './helpers'
-import { id, sections } from './app/activePage'
-import { saved } from './app/misc'
-import { html, css, fields } from './data/draft'
+import { id as activePageID, sections } from './app/activePage'
+import { saved, locale } from './app/misc'
+import { content, html, css, fields } from './data/draft'
 import * as stores from './data/draft'
 import { timeline, undone, site as unsavedSite } from './data/draft'
 import site from './data/site'
@@ -25,10 +25,11 @@ export async function hydrateSite(data) {
   html.set(data.html || DEFAULTS.html)
   fields.set(data.fields)
   stores.symbols.set(data.symbols)
+  stores.content.set(data.content)
 }
 
 export async function updateActivePageHTML(html) {
-  pages.update(get(id), (page) => ({
+  pages.update(get(activePageID), (page) => ({
     ...page,
     html,
   }));
@@ -65,7 +66,7 @@ export async function emancipateInstances(symbol) {
   );
   stores.pages.set(updatedPages)
 
-  const activePageSections = find(updatedPages, ['id', get(id)])['sections']
+  const activePageSections = find(updatedPages, ['id', get(activePageID)])['sections']
   sections.set(activePageSections)
 }
 
@@ -154,4 +155,47 @@ export const pages = {
     )
     stores.pages.set(newPages)
   }
+}
+
+
+export async function updateContent(blockID, updatedValue) {
+  const currentContent = get(content)
+  const activeLocale = get(locale)
+  const pageID = get(activePageID)
+  const localeExists = !!currentContent[activeLocale]
+  const pageExists = localeExists ? !!currentContent[activeLocale][pageID] : false
+  const blockExists = pageExists ? !!currentContent[activeLocale][pageID][blockID] : false
+
+  if (blockExists) {
+    content.update(content => ({
+      ...content,
+      [activeLocale]: {
+        ...content[activeLocale],
+        [pageID]: {
+          ...content[activeLocale][pageID],
+          [blockID]: updatedValue
+        }
+      }
+    }))
+  } else {
+    // create matching block in all locales
+    for(let [ locale, pages ] of Object.entries(currentContent)) {
+      content.update(c => ({
+        ...c,
+        [locale]: {
+          ...c[locale],
+          [pageID]: {
+            ...c[locale][pageID],
+            [blockID]: updatedValue
+          }
+        }
+      }))
+    }
+  }
+
+  // if (!pageExists) {
+  //   for(let locale of currentContent) {
+  //     console.log({locale})
+  //   }
+  // }
 }

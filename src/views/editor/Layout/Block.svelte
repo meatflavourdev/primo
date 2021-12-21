@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher, onDestroy } from 'svelte';
+  import _ from 'lodash-es'
   import { fade } from 'svelte/transition';
   const dispatch = createEventDispatcher();
 
@@ -13,8 +14,9 @@
   import { onMobile, saved } from '../../../stores/app/misc';
   import modal from '../../../stores/app/modal';
   import { id, sections } from '../../../stores/app/activePage';
-  import { pages } from '../../../stores/actions';
+  import { pages, updateContent } from '../../../stores/actions';
 
+  export let content
   export let block
   export let i
 
@@ -108,8 +110,28 @@
     }
   }
 
+  function getDataFromFields(fields) {
+    const parsedFields = fields.map((field) => {
+      if (field.type === "group") {
+        if (field.fields) {
+          field.value = _.chain(field.fields)
+            .keyBy("key")
+            .mapValues("value")
+            .value();
+        }
+      }
+      return field;
+    })
+
+    if (!parsedFields.length) return {}
+
+    return _.chain(parsedFields).keyBy("key").mapValues("value").value()
+  }
+
   async function selectOption(option, payload = null) {
     if (option === 'component') {
+      const data = getDataFromFields(payload.value.fields)
+      updateContent(payload.id, data)
       updateBlock(payload);
     } else if (option === 'content') {
       updateBlock(ContentRow());
@@ -128,7 +150,15 @@
           icon: 'fas fa-check',
           label: 'Draft',
           onclick: (component) => {
-            updateBlock(component);
+            const data = component.value.fields.map(field => ({
+              key: field.key,
+              value: field.value
+            }))
+            const asObj = _.chain(data)
+              .keyBy("key")
+              .mapValues("value")
+              .value();
+            updateContent(component.id, asObj)
             modal.hide();
           },
         },
@@ -243,7 +273,7 @@
     />
   </div>
   {#if block.type === 'component'}
-    <ComponentNode {block} {node} on:mount={() => {mounted = true; dispatch('mount')}} />
+    <ComponentNode {content} {block} {node} on:mount={() => {mounted = true; dispatch('mount')}} />
   {:else if block.type === 'content'}
     <ContentNode
       {block}
@@ -253,7 +283,7 @@
       }}
       on:debounce={() => ($saved = false)}
       on:change={({ detail: html }) => {
-        updateBlock({ ...block, value: { html } });
+        updateContent(block.id, html)
         dispatch('contentChanged');
       }}
       on:selectionChange={({ detail: selection }) => {

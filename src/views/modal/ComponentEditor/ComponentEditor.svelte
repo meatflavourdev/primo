@@ -50,7 +50,7 @@
   };
 
   let localComponent = cloneDeep(component);
-  function saveRawValue(property, value) {
+  function saveLocalValue(property, value) {
     localComponent.value[property] = value;
   }
 
@@ -119,9 +119,9 @@
       clearTimeout(timeout);
       error = res.error;
       componentApp = res.js;
-      saveRawValue('html', html);
-      saveRawValue('css', css);
-      saveRawValue('js', js);
+      saveLocalValue('html', html);
+      saveLocalValue('css', css);
+      saveLocalValue('js', js);
     }
   }
 
@@ -175,7 +175,7 @@
 
   function addNewField() {
     fields = [...fields, Field()];
-    saveRawValue('fields', fields);
+    saveLocalValue('fields', fields);
   }
 
   function addSubField(id) {
@@ -190,7 +190,7 @@
           : field.fields,
     }));
     refreshFields();
-    saveRawValue('fields', fields);
+    saveLocalValue('fields', fields);
   }
 
   function deleteSubfield(fieldId, subfieldId) {
@@ -205,19 +205,19 @@
           }
     );
     refreshFields();
-    saveRawValue('fields', fields);
+    saveLocalValue('fields', fields);
   }
 
   function deleteField(id) {
     fields = fields.filter((field) => field.id !== id);
     refreshFields();
-    saveRawValue('fields', fields);
+    saveLocalValue('fields', fields);
   }
 
   function refreshFields() {
     // necessary to re-render field values in preview (since we're mutating `field`)
     fields = fields.filter(Boolean);
-    saveRawValue('fields', fields);
+    saveLocalValue('fields', fields);
     compileComponentCode({
       html: rawHTML,
       css: rawCSS,
