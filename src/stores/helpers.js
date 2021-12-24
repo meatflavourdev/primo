@@ -2,7 +2,7 @@ import {unionBy, find, uniqBy} from 'lodash-es'
 import { get } from 'svelte/store'
 import { fields as siteFields } from './data/draft'
 import { id, fields as pageFields, css as pageCSS, html as pageHTML, sections } from './app/activePage'
-import { symbols } from './data/draft'
+import { content, symbols } from './data/draft'
 import { convertFieldsToData, processCode, processCSS } from '../utils'
 import {DEFAULTS} from '../const'
 
@@ -280,4 +280,11 @@ export async function buildPagePreview({ page, site }) {
     })
   ])
   return res
+}
+
+export async function addLocale(key) {
+  content.update(s => ({
+    ...s,
+    [key]: s.en
+  }))
 }

@@ -199,6 +199,7 @@
 <div
   bind:this={element}
   class="primo-page being-edited"
+  lang={$locale}
 >
   {#if pageExists}
     {#each $sections as block, i (block.id)}
