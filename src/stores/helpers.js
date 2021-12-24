@@ -195,8 +195,9 @@ export async function buildStaticPage({ page, site, separateModules = false }) {
           // import active language json, hydrate block
           const urlSearchParams = new URLSearchParams(window.location.search);
           const {lang = 'en'} = Object.fromEntries(urlSearchParams.entries());
-          fetch('/primo.json').then(res => res.json()).then(site => {
-            document.querySelector('#${id} > .primo-${type}').innerHTML = site.content[lang]['${page.id}']['${block.id}']
+          const file = '/' + lang + '.json'
+          fetch(file).then(res => res.json()).then(content => {
+            document.querySelector('#${id} > .primo-${type}').innerHTML = content['${page.id}']['${block.id}']
           })
         </script>
         ` : ''
@@ -212,11 +213,12 @@ export async function buildStaticPage({ page, site, separateModules = false }) {
           import App from './_modules/${block.id}.js';
           const urlSearchParams = new URLSearchParams(window.location.search);
           const {lang = 'en'} = Object.fromEntries(urlSearchParams.entries());
-          fetch('/primo.json').then(res => res.json()).then(site => {
+          const file = '/' + lang + '.json'
+          fetch(file).then(res => res.json()).then(content => {
             new App({
               target: document.querySelector('#${block.id}'),
               hydrate: true,
-              props: site.content[lang]['${page.id}']['${block.id}']
+              props: content['${page.id}']['${block.id}']
             });
           })
           // fetch primo.json, extract language json, pass into app, listen to localstorage changes for locale change
