@@ -19,9 +19,11 @@
     processCSS,
     wrapInStyleTags,
   } from '../../../utils';
+  import { locale } from '../../../stores/app/misc';
 
-  import { css as siteCSS, html as siteHTML } from '../../../stores/data/draft';
+  import { content, css as siteCSS, html as siteHTML } from '../../../stores/data/draft';
   import {
+    id as pageID,
     html as pageHTML,
     css as pageCSS,
   } from '../../../stores/app/activePage';
@@ -49,7 +51,24 @@
     },
   };
 
-  let localComponent = cloneDeep(component);
+  let localComponent = setUpComponent(component);
+  function setUpComponent(component) {
+    const replacedFieldValues = component.value.fields.map(field => {
+      return {
+        ...field,
+        value: $content[$locale][$pageID][component.id][field.key]
+      }
+    })
+    return cloneDeep({
+      ...component,
+      value: {
+        ...component.value,
+        fields: replacedFieldValues
+      }
+    })
+  }
+
+
   function saveLocalValue(property, value) {
     localComponent.value[property] = value;
   }
