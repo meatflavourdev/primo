@@ -5,7 +5,7 @@
   import ToolbarButton from './ToolbarButton.svelte';
   import { PrimoButton } from '../../components/buttons';
   import { content, name } from '../../stores/data/draft';
-  import {addLocale} from '../../stores/helpers'
+  import {addLocale} from '../../stores/actions'
   import {locales as availableLocales} from '../../const'
   import { showingIDE, userRole } from '../../stores/app';
   import { id as pageID } from '../../stores/app/activePage';

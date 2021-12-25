@@ -3,9 +3,8 @@ import { get } from 'svelte/store'
 import { getSymbol } from './helpers'
 import { id as activePageID, sections } from './app/activePage'
 import { saved, locale } from './app/misc'
-import { content, html, css, fields } from './data/draft'
 import * as stores from './data/draft'
-import { timeline, undone, site as unsavedSite } from './data/draft'
+import { content, html, css, fields, timeline, undone, site as unsavedSite } from './data/draft'
 import site from './data/site'
 import {DEFAULTS} from '../const'
 
@@ -157,7 +156,6 @@ export const pages = {
   }
 }
 
-
 export async function updateContent(blockID, updatedValue) {
   const currentContent = get(content)
   const activeLocale = get(locale)
@@ -165,6 +163,21 @@ export async function updateContent(blockID, updatedValue) {
   const localeExists = !!currentContent[activeLocale]
   const pageExists = localeExists ? !!currentContent[activeLocale][pageID] : false
   const blockExists = pageExists ? !!currentContent[activeLocale][pageID][blockID] : false
+
+  if (!updatedValue) { // Delete block from all locales
+    const updatedPage = currentContent[activeLocale][pageID]
+    delete updatedPage[blockID]
+    content.update(content => {
+      for (const [ locale, pages ] of Object.entries(content)) {
+        content[locale] = {
+          ...pages,
+          [pageID]: updatedPage
+        }
+      }
+      return content
+    })
+    return
+  }
 
   if (blockExists) {
     content.update(content => ({
@@ -192,10 +205,12 @@ export async function updateContent(blockID, updatedValue) {
       }))
     }
   }
+}
 
-  // if (!pageExists) {
-  //   for(let locale of currentContent) {
-  //     console.log({locale})
-  //   }
-  // }
+
+export async function addLocale(key) {
+  content.update(s => ({
+    ...s,
+    [key]: s.en
+  }))
 }

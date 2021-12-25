@@ -43,8 +43,10 @@
   function deleteRow() {
     const onlyChild = $sections.length <= 1;
     if (onlyChild) {
+      updateContent(block.id, null) // should be first
       updateBlock(OptionsRow());
     } else {
+      updateContent(block.id, null)
       updateBlock(null);
     }
   }

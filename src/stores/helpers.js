@@ -281,10 +281,3 @@ export async function buildPagePreview({ page, site }) {
   ])
   return res
 }
-
-export async function addLocale(key) {
-  content.update(s => ({
-    ...s,
-    [key]: s.en
-  }))
-}
