@@ -1,4 +1,4 @@
-import { find, last, cloneDeep, some } from 'lodash-es'
+import { find, last, cloneDeep, some, chain } from 'lodash-es'
 import { get } from 'svelte/store'
 import { getSymbol } from './helpers'
 import { id as activePageID, sections } from './app/activePage'
@@ -205,6 +205,48 @@ export async function updateContent(blockID, updatedValue) {
       }))
     }
   }
+}
+
+export async function saveFields(newPageFields, newSiteFields) {
+  pages.update(get(activePageID), (page) => ({
+    ...page,
+    fields: cloneDeep(newPageFields),
+  }));
+  fields.set(newSiteFields);
+
+  const activeLocale = get(locale)
+  const pageID = get(activePageID)
+  const pageData = chain(
+    newPageFields.map(
+      field => ({
+        key: field.key,
+        value: field.value
+      })
+    ))
+    .keyBy("key")
+    .mapValues("value")
+    .value();
+  const siteData = chain(
+    newSiteFields.map(
+      field => ({
+        key: field.key,
+        value: field.value
+      })
+    ))
+    .keyBy("key")
+    .mapValues("value")
+    .value();
+  content.update(content => ({
+    ...content,
+    [activeLocale]: {
+      ...content[activeLocale],
+      ...siteData,
+      [pageID]: {
+        ...content[activeLocale][pageID],
+        ...pageData
+      }
+    }
+  }))
 }
 
 
