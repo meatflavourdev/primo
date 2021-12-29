@@ -2,16 +2,16 @@ import {unionBy, find, uniqBy} from 'lodash-es'
 import { get } from 'svelte/store'
 import { fields as siteFields } from './data/draft'
 import { id, fields as pageFields, css as pageCSS, html as pageHTML, sections } from './app/activePage'
-import { content, symbols } from './data/draft'
+import { symbols } from './data/draft'
 import { convertFieldsToData, processCode, processCSS } from '../utils'
-import {DEFAULTS} from '../const'
+import {Page} from '../const'
 
 export function resetActivePage() {
   id.set('index')
-  sections.set(DEFAULTS.page.sections)
-  pageFields.set(DEFAULTS.fields)
-  pageHTML.set(DEFAULTS.html)
-  pageCSS.set(DEFAULTS.css)
+  sections.set([])
+  pageFields.set([])
+  pageHTML.set(Page().code.html)
+  pageCSS.set(Page().code.css)
 }
 
 export function getAllFields(componentFields = [], exclude = () => true) {
@@ -164,7 +164,7 @@ export async function buildStaticPage({ page, site, separateModules = false }) {
 
   const modules = uniqBy(
     blocks.filter(block => block.type === 'component').map(block => ({
-      id: block.id,
+      id: block.symbol,
       content: block.js
     })), 'id'
   )
@@ -210,7 +210,7 @@ export async function buildStaticPage({ page, site, separateModules = false }) {
     return blocks.filter(block => block.type === 'component').map(block => {
       return separateModules ? 
         `<script type="module" async>
-          import App from './_modules/${block.id}.js';
+          import App from './_modules/${block.symbol}.js';
           const urlSearchParams = new URLSearchParams(window.location.search);
           const {lang = 'en'} = Object.fromEntries(urlSearchParams.entries());
           const file = '/' + lang + '.json'

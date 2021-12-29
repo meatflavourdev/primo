@@ -143,7 +143,7 @@
       processCode({
         code: {
           html: `<svelte:head>
-            ${siteHTML.head}${pageHTML.head}
+            ${siteHTML?.head}${pageHTML?.head}
             ${wrapInStyleTags(css)}
           </svelte:head>`,
           css: '',

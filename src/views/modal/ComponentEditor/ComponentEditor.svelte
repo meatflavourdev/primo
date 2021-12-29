@@ -1,5 +1,5 @@
 <script>
-  import { cloneDeep, find, isEqual } from 'lodash-es';
+  import { cloneDeep, find, isEqual, chain as _chain } from 'lodash-es';
   import HSplitPane from './HSplitPane.svelte';
   import { createUniqueID } from '../../../utilities';
   import ModalHeader from '../ModalHeader.svelte';
@@ -35,7 +35,6 @@
   import { getAllFields, getSymbol } from '../../../stores/helpers';
 
   // This is the only way I could figure out how to get lodash's debouncer to work correctly
-  const slowDebounce = createDebouncer(1000);
   const quickDebounce = createDebouncer(200);
 
   export let component = Component();
@@ -51,26 +50,35 @@
     },
   };
 
-  let localComponent = setUpComponent(component);
-  function setUpComponent(component) {
-    const replacedFieldValues = component.value.fields.map(field => {
-      return {
-        ...field,
-        value: $content[$locale][$pageID][component.id][field.key]
-      }
-    })
+  let localComponent = getFieldValues(component)
+
+  $: $locale, setupComponent()
+  function setupComponent() {
+    localComponent = getFieldValues(localComponent)
+    fields = localComponent.value.fields
+  }
+
+  function getFieldValues(component) {
+    console.log(component)
     return cloneDeep({
       ...component,
       value: {
         ...component.value,
-        fields: replacedFieldValues
-      }
+        fields: component.value.fields.map(field => ({
+          ...field,
+          value: component.content?.[$locale]?.[field.key] || $content[$locale][$pageID][component.id][field.key]
+        }))
+      },
+      content: component.content || {}
     })
   }
 
 
   function saveLocalValue(property, value) {
     localComponent.value[property] = value;
+    if (property === 'fields') {
+      localComponent['content'][$locale] = _chain(value).keyBy('key').mapValues('value').value()
+    }
   }
 
   const allFieldTypes = [
@@ -97,7 +105,6 @@
     html: rawHTML,
     css: rawCSS,
     js: rawJS,
-    // fields,
   });
 
   let throttling = false;
@@ -341,7 +348,8 @@
     fields = updatedFields;
   }
 
-  if (localComponent.symbolID && $showingIDE) {
+  // Immediately load the symbol (refactor TODO)
+  $: if (localComponent.symbolID && $showingIDE) {
     loadSymbol();
   }
 
@@ -387,7 +395,7 @@
       localStorage.setItem('editorWidth', left);
       localStorage.setItem('previewWidth', right);
     }}>
-    <div slot="left">
+    <div slot="left" lang={$locale}>
       {#if $showingIDE}
         {#if !disabled}
           <Tabs {tabs} bind:activeTab variants="mb-1" />
@@ -396,15 +404,10 @@
           <div class="flex flex-wrap">
             <button
               style="min-width: 200px"
-              class="m-1 border-2 border-primored py-6 rounded text-gray-100 font-semibold hover:bg-primored"
               on:click={loadSymbol}
               id="edit-symbol"
               title="Edit the Component">
               <span class="flex items-center justify-center">
-                <!-- <svg class="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z" />
-              <path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z" />
-            </svg> -->
                 Edit Component
               </span>
             </button>
@@ -472,7 +475,7 @@
                 </EditField>
                 {#if field.type === 'group'}
                   {#if field.fields}
-                    {#each field.fields as subfield, childIndex}
+                    {#each field.fields as subfield, childIndex (subfield.id)}
                       <EditField
                         minimal={field.type === 'info'}
                         child={true}
@@ -523,7 +526,7 @@
                     {disabled}><i class="fas fa-plus mr-2" />Create Subfield</button>
                 {:else if field.type === 'repeater'}
                   {#if field.fields}
-                    {#each field.fields as subfield, childIndex}
+                    {#each field.fields as subfield, childIndex (subfield.id)}
                       <EditField
                         minimal={field.type === 'info'}
                         child={true}
@@ -572,8 +575,9 @@
           </div>
         {/if}
       {:else}
-        <div class="space-y-2 h-full">
-          {#each fields as field}
+        <div>
+          <!-- use key so repeater fields update when changing locale -->
+          {#each fields as field} 
             {#if field.key && getFieldComponent(field)}
               <div
                 class="field-item shadow"

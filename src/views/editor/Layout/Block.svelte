@@ -152,17 +152,10 @@
           icon: 'fas fa-check',
           label: 'Draft',
           onclick: (component) => {
-            const data = _.chain(
-              component.value.fields.map(
-                field => ({
-                  key: field.key,
-                  value: field.value
-                })
-              ))
-              .keyBy("key")
-              .mapValues("value")
-              .value();
-            updateContent(component.id, data)
+            Object.entries(component.content).forEach(field => {
+              const [ localeID, localeContent ] = field
+              updateContent(component.id, localeContent, localeID)
+            })
             modal.hide();
           },
         },

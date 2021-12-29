@@ -6,7 +6,6 @@ import { saved, locale } from './app/misc'
 import * as stores from './data/draft'
 import { content, html, css, fields, timeline, undone, site as unsavedSite } from './data/draft'
 import site from './data/site'
-import {DEFAULTS} from '../const'
 
 export async function saveSite() {
   const finalSave = get(unsavedSite)
@@ -20,8 +19,8 @@ export async function hydrateSite(data) {
   stores.name.set(data.name)
   stores.pages.set(data.pages)
 
-  css.set(data.css || DEFAULTS.css)
-  html.set(data.html || DEFAULTS.html)
+  css.set(data.css)
+  html.set(data.html)
   fields.set(data.fields)
   stores.symbols.set(data.symbols)
   stores.content.set(data.content)
@@ -156,9 +155,8 @@ export const pages = {
   }
 }
 
-export async function updateContent(blockID, updatedValue) {
+export async function updateContent(blockID, updatedValue, activeLocale = get(locale)) {
   const currentContent = get(content)
-  const activeLocale = get(locale)
   const pageID = get(activePageID)
   const localeExists = !!currentContent[activeLocale]
   const pageExists = localeExists ? !!currentContent[activeLocale][pageID] : false

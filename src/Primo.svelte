@@ -33,8 +33,6 @@
   export let role = 'developer';
   export let saving = false;
   $: $savingStore = saving;
-
-  // $: $showingIDE = role === 'developer' ? true : false;
   $: $userRole = role;
   $: $librariesStore = libraries;
 
@@ -51,7 +49,7 @@
 
   $: $pageId = getPageId($pageStore.params);
   function getPageId(params) {
-    const { site, page = 'index' } = params;
+    const { page = 'index' } = params;
     const [root, child] = page.split('/');
     return child ? `${root}/${child}` : root;
   }
@@ -72,8 +70,8 @@
     function setPageStore(page) {
       sections.set(page.sections);
       fields.set(page.fields);
-      html.set(page.html || DEFAULTS.html);
-      css.set(page.css || DEFAULTS.css);
+      html.set(page.html);
+      css.set(page.css);
     }
   }
 
