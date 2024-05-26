@@ -26,7 +26,7 @@
     "@primo-app/primo": "^1.3.83",
     "file-saver": "^2.0.5",
     "idb-keyval": "^6.0.3",
-    "js-beautify": "^1.14.0",
+    "js-beautify": "^1.14.10",
     "jszip": "^3.7.1",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
