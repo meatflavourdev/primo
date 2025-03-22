@@ -75,7 +75,7 @@
     "prosemirror-history": "^1.1.3",
     "prosemirror-inputrules": "^1.1.3",
     "prosemirror-keymap": "^1.1.4",
-    "prosemirror-schema-basic": "^1.1.2",
+    "prosemirror-schema-basic": "^1.2.4",
     "prosemirror-schema-list": "^1.1.5",
     "prosemirror-view": "^1.18.11",
     "showdown": "^1.9.1",
