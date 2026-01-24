@@ -22,7 +22,7 @@
     "@types/lodash": "^4.14.168",
     "jest": "^26.0.1",
     "prettier-plugin-svelte": "^1.1.0",
-    "svelte": "^3.35.0",
+    "svelte": "^3.59.2",
     "tslib": "^2.0.0",
     "typescript": "^4.2.3"
   },
@@ -61,8 +61,8 @@
     "browser-image-compression": "^1.0.16",
     "idb-keyval": "^6.0.2",
     "js-base64": "^3.6.0",
-    "lodash": "^4.17.21",
-    "lodash-es": "^4.17.21",
+    "lodash": "^4.17.23",
+    "lodash-es": "^4.17.23",
     "lz-string": "^1.4.4",
     "mini-svg-data-uri": "^1.4.3",
     "mousetrap": "^1.6.5",
@@ -79,7 +79,7 @@
     "prosemirror-schema-list": "^1.1.5",
     "prosemirror-view": "^1.18.11",
     "showdown": "^1.9.1",
-    "svelte": "^3.32.3"
+    "svelte": "^3.59.2"
   },
   "resolutions": {
     "prosemirror-model": "1.15.0"
